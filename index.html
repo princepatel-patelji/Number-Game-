@@ -9,7 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
-    
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#1e1e2f">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -465,5 +466,14 @@
         // Initialize App
         initCloud();
     </script>
+    <script>
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('service-worker.js')
+        .then(registration => console.log('Service Worker Registered!'))
+        .catch(err => console.log('Service Worker failed: ', err));
+    });
+  }
+</script>
 </body>
 </html>
