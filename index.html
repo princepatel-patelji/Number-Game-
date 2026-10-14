@@ -10,7 +10,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/tone/14.8.49/Tone.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     <link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#1e1e2f">
+    <meta name="theme-color" content="#1e1e2f">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -72,19 +72,21 @@
 </head>
 <body>
 
+    <!-- Name Input Modal -->
     <div id="name-modal" class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center hidden backdrop-blur-sm">
         <div class="glass-panel p-8 rounded-2xl text-center max-w-sm w-full mx-4 fade-in">
             <div class="text-5xl mb-4">👋</div>
             <h2 class="text-2xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-500">Welcome to Prince Games!</h2>
             <p class="text-gray-300 text-sm mb-6">Enter your name to track your awesome score.</p>
             <input type="text" id="player-name-input" placeholder="Your Name..." 
-                class="w-full bg-black/50 border border-white/20 rounded-xl py-3 px-4 text-center text-xl font-bold text-white outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/50 mb-4 transition-all">
+                class="w-full bg-black/50 border border-white/20 rounded-xl py-3 px-4 text-center text-xl font-bold text-white outline-none focus:border-yellow-400 focus:ring-2 focus:ring-yellow-400/50 mb-4 transition-all autocomplete="off"">
             <button onclick="window.savePlayerName()" class="w-full py-3 rounded-xl font-bold bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-400 hover:to-orange-400 text-black shadow-lg transition-all transform hover:scale-105">
                 Let's Play! 🚀
             </button>
         </div>
     </div>
 
+    <!-- Top Branding -->
     <div class="absolute top-6 left-0 w-full flex justify-center fade-in">
         <div class="glass-panel px-6 py-2 rounded-full flex items-center gap-3 border-yellow-500/30">
             <span class="text-2xl">👑</span>
@@ -95,6 +97,7 @@
     </div>
 
     <div class="max-w-md w-full mt-20 z-10">
+        <!-- Stats Panel -->
         <div class="glass-panel rounded-2xl p-4 mb-4 flex justify-between items-center fade-in">
             <div class="flex items-center gap-3">
                 <div class="w-12 h-12 rounded-full bg-gradient-to-br from-blue-400 to-purple-600 flex items-center justify-center text-xl shadow-lg border-2 border-white/20">
@@ -102,8 +105,10 @@
                 </div>
                 <div>
                     <div class="text-[10px] text-gray-400 uppercase tracking-wider font-bold">Player</div>
-                    <div id="display-player-name" class="font-bold text-lg text-white">
-                        Guest
+                    <div class="flex items-center gap-2">
+                        <div id="display-player-name" class="font-bold text-lg text-white">Guest</div>
+                        <!-- Naya Edit Button Yahan Hai -->
+                        <button onclick="window.resetPlayer()" class="text-xs text-yellow-400 hover:text-white transition-colors bg-black/30 p-1 rounded-md ml-1" title="Change Name">✏️ Edit</button>
                     </div>
                 </div>
             </div>
@@ -120,6 +125,7 @@
             </div>
         </div>
 
+        <!-- Game Container -->
         <div id="game-container" class="glass-panel rounded-3xl p-8 w-full text-center fade-in relative overflow-hidden">
             
             <!-- Header -->
@@ -148,6 +154,7 @@
                 </button>
             </div>
 
+            <!-- Screen 2: Gameplay -->
             <div id="screen-game" class="hidden space-y-6 fade-in relative z-10">
                 <div class="flex justify-between items-center text-sm font-bold bg-black/40 p-4 rounded-xl border border-white/10 shadow-inner">
                     <span id="range-text" class="text-cyan-400 flex items-center gap-2"><span class="text-lg">🎯</span> 1 to 100</span>
@@ -166,6 +173,7 @@
                 <div id="feedback-msg" class="h-8 font-black text-xl tracking-wide drop-shadow-md"></div>
             </div>
 
+            <!-- Screen 3: Results -->
             <div id="screen-result" class="hidden space-y-6 fade-in relative z-10">
                 <div id="result-emoji" class="text-6xl animate-bounce"></div>
                 <h2 id="result-title" class="text-4xl font-black mb-2 uppercase tracking-wider"></h2>
@@ -179,23 +187,21 @@
         </div>
     </div>
 
+    <!-- Footer -->
     <div class="absolute bottom-4 left-0 w-full text-center">
         <p class="text-xs text-white/40 font-semibold tracking-widest uppercase">
             Game Developer: <span class="text-yellow-500/70">Prince</span>
         </p>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
-        import { getAuth, signInAnonymously, signInWithCustomToken } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
-
+    <!-- Pure Javascript Logic (No Firebase) -->
+    <script>
         // Global Game Variables
         let targetNumber, maxAttempts, attemptsLeft, attemptsUsed, maxRange;
+        // Data structure to save in device memory
         let playerStats = { wins: 0, losses: 0, playerName: "" };
-        let db, auth, userId, appId, cloudActive = false;
 
-        // UI Elements
+        // UI Element References
         const screenStart = document.getElementById('screen-start');
         const screenGame = document.getElementById('screen-game');
         const screenResult = document.getElementById('screen-result');
@@ -208,6 +214,7 @@
         const nameModal = document.getElementById('name-modal');
         const nameInput = document.getElementById('player-name-input');
 
+        // ====== AUDIO SYSTEM (Tone.js) ======
         let synth, polySynth, isAudioInit = false;
 
         async function initAudio() {
@@ -235,99 +242,77 @@
             }
         }
 
-        async function initCloud() {
-            try {
-                if (typeof __app_id === 'undefined' || typeof __firebase_config === 'undefined') {
-                    console.log("Local mode. Checking local variables.");
-                    checkPlayerName();
-                    return; 
-                }
-
-                appId = __app_id;
-                const app = initializeApp(JSON.parse(__firebase_config));
-                auth = getAuth(app);
-                db = getFirestore(app);
+        // ====== LOCAL STORAGE SYSTEM (Permanent Offline Save) ======
+        function loadLocalData() {
+            const savedData = localStorage.getItem("princeGameData_v2"); // New key to avoid old broken data
+            if (savedData) {
+                playerStats = JSON.parse(savedData);
                 
-                if (typeof __initial_auth_token !== 'undefined') {
-                    await signInWithCustomToken(auth, __initial_auth_token);
+                if (playerStats.playerName && playerStats.playerName.trim() !== "") {
+                    // Name is saved, hide modal and update UI
+                    nameModal.classList.add('hidden');
+                    updateStatsUI();
                 } else {
-                    await signInAnonymously(auth);
+                    // Data exists but no name, ask for name
+                    askForName();
                 }
-                
-                userId = auth.currentUser.uid;
-                cloudActive = true;
-                await loadStats();
-            } catch (error) {
-                console.error("Cloud failed, local mode active.", error);
-                checkPlayerName();
+            } else {
+                // First time ever playing
+                askForName();
             }
         }
 
-        async function loadStats() {
-            if (!cloudActive || !userId) return checkPlayerName();
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'users', userId, 'player_stats');
-                const docSnap = await getDoc(docRef);
-                if (docSnap.exists()) {
-                    playerStats = { ...playerStats, ...docSnap.data() };
-                }
-            } catch (e) {
-                console.error("Error loading stats", e);
-            }
-            checkPlayerName();
-            updateStatsUI();
+        function askForName() {
+            nameModal.classList.remove('hidden');
+            setTimeout(() => nameInput.focus(), 100);
         }
 
-        async function saveStats() {
+        function saveLocalData() {
+            localStorage.setItem("princeGameData_v2", JSON.stringify(playerStats));
             updateStatsUI();
-            if (!cloudActive || !userId) return;
-            try {
-                const docRef = doc(db, 'artifacts', appId, 'users', userId, 'player_stats');
-                await setDoc(docRef, playerStats);
-            } catch (e) {}
         }
 
         function updateStatsUI() {
             statWinsEl.innerText = playerStats.wins;
             statLossesEl.innerText = playerStats.losses;
-            if(playerStats.playerName) {
+            if (playerStats.playerName) {
                 displayNameEl.innerText = playerStats.playerName;
             }
             
-            // Animation triggers
+            // Pop Animations for numbers
             statWinsEl.classList.remove('pop');
             statLossesEl.classList.remove('pop');
-            void statWinsEl.offsetWidth; 
+            void statWinsEl.offsetWidth; // Trigger reflow
             statWinsEl.classList.add('pop');
             statLossesEl.classList.add('pop');
         }
 
-        function checkPlayerName() {
-            if (!playerStats.playerName || playerStats.playerName.trim() === "") {
-                nameModal.classList.remove('hidden');
-                setTimeout(() => nameInput.focus(), 100);
-            } else {
-                updateStatsUI();
-            }
-        }
-
+        // ====== PLAYER NAME LOGIC ======
         window.savePlayerName = async function() {
             const name = nameInput.value.trim();
-            if(name) {
-                await initAudio(); // Start audio context on user gesture
+            if (name) {
+                await initAudio(); // Start audio engine on user interaction
                 playerStats.playerName = name;
                 playSound('click');
                 nameModal.classList.add('hidden');
-                saveStats();
+                saveLocalData(); // Save name instantly
             } else {
                 nameInput.classList.add('border-red-500');
             }
+        }
+
+        // Logic for Edit Button
+        window.resetPlayer = function() {
+            nameModal.classList.remove('hidden');
+            nameInput.value = playerStats.playerName; // Pre-fill current name
+            setTimeout(() => nameInput.focus(), 100);
         }
 
         nameInput.addEventListener("keypress", (e) => {
             if (e.key === "Enter") window.savePlayerName();
         });
 
+        // ====== CORE GAME LOGIC ======
         window.startGame = async function(range, attempts) {
             await initAudio();
             playSound('click');
@@ -402,6 +387,7 @@
             container.classList.add('shake');
         }
 
+        // ====== CONFETTI SYSTEM ======
         function fireConfetti() {
             const duration = 3000;
             const end = Date.now() + duration;
@@ -428,6 +414,7 @@
             }());
         }
 
+        // ====== RESULT SYSTEM ======
         function endGame(isWin) {
             screenGame.classList.add('hidden');
             screenResult.classList.remove('hidden');
@@ -438,7 +425,7 @@
 
             if (isWin) {
                 playSound('win');
-                playerStats.wins++; 
+                playerStats.wins++; // Update score
                 emoji.innerText = "🏆";
                 title.innerText = "EPIC WIN!";
                 title.className = "text-5xl font-black mb-2 text-green-400 drop-shadow-[0_0_15px_rgba(74,222,128,0.8)]";
@@ -447,14 +434,14 @@
                 fireConfetti();
             } else {
                 playSound('lose');
-                playerStats.losses++; 
+                playerStats.losses++; // Update score
                 emoji.innerText = "💥";
-                title.innerText = "GAME OVER   (Khel Khtm Beta)";
+                title.innerText = "GAME OVER (Khel Khtm Beta)";
                 title.className = "text-5xl font-black mb-2 text-red-500 drop-shadow-[0_0_15px_rgba(239,68,68,0.8)]";
                 desc.innerHTML = `You ran out of attempts.<br>The correct number was <span class="text-cyan-400 font-black text-2xl ml-2">${targetNumber}</span>`;
             }
             
-            saveStats();
+            saveLocalData(); // Save updated score permanently
         }
 
         window.resetGame = function() {
@@ -463,17 +450,19 @@
             screenStart.classList.remove('hidden');
         }
 
-        // Initialize App
-        initCloud();
+        // STARTUP: Check LocalStorage exactly when the page loads
+        window.onload = loadLocalData;
     </script>
+
+    <!-- PWA Service Worker Registration -->
     <script>
-  if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(registration => console.log('Service Worker Registered!'))
-        .catch(err => console.log('Service Worker failed: ', err));
-    });
-  }
-</script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => console.log('Service Worker Registered!'))
+                    .catch(err => console.log('Service Worker failed: ', err));
+            });
+        }
+    </script>
 </body>
 </html>
